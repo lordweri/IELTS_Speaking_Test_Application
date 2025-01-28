@@ -1,4 +1,9 @@
+import flask
+import torch
+import spacy
 import whisper
-model = whisper.load_model("base")
-print("Whisper model downloaded successfully!")
+import nltk
+import soundfile
+from language_tool_python import LanguageTool
 
+print("All libraries are installed successfully!")
