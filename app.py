@@ -1,9 +1,29 @@
-import flask
-import torch
-import spacy
+from flask import Flask, request, jsonify, render_template
 import whisper
-import nltk
-import soundfile
-from language_tool_python import LanguageTool
+from utils.audio_recorder import record_audio
+from utils.speech_to_text import speech_to_text
+from utils.scoring import score_response
 
-print("All libraries are installed successfully!")
+app = Flask(__name__)   
+
+#Load Whisper Model
+whisper_model = whisper.load_model("base")
+@app.route('/')
+
+def index():
+    return render_template('index.html')
+
+@app.route('/start-recording', methods=['POST'])
+def start_recording():
+    audio_file = record_audio()
+    return jsonify({"status": "success", "audio_file": audio_file})
+
+@app.route('/process_audio', methods=['POST'])
+def process_audio(audio_file):
+    audio_file = request.json['audio_file']
+    transcription = transcribe_audio(audio_file, whisper_model)
+    score = score_response(transcription)
+    return jsonify({"transcription": transcription, "score": score})
+
+if __name__ == '__main__':
+    app.run(debug=True)
