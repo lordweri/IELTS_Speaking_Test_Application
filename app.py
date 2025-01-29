@@ -18,10 +18,10 @@ def start_recording():
     audio_file = record_audio()
     return jsonify({"status": "success", "audio_file": audio_file})
 
-@app.route('/process_audio', methods=['POST'])
-def process_audio(audio_file):
+@app.route('/process-audio', methods=['POST'])
+def process_audio():
     audio_file = request.json['audio_file']
-    transcription = transcribe_audio(audio_file, whisper_model)
+    transcription = speech_to_text(audio_file, whisper_model)
     score = score_response(transcription)
     return jsonify({"transcription": transcription, "score": score})
 

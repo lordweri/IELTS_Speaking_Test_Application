@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>IELTS Speaking Simulation</title>
+    </head>
+    <body>
+        <h1>Practice Test</h1>
+        <button id="startButton">Start Recording</button>
+        <div id="feedback"></div>
+        <script>
+            document.getElementById("startButton").onclick = function(){
+                fetch('/start-recording', {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    processAudio();
+                });
+            };
+
+            function processAudio(){
+                fetch('/process-audio', {method: 'POST',
+                    body: JSON.stringify({audio_file: 'audio.wav'}),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    document.getElementById("feedback").innerTEXT = JSON,stringify(data, null, 2);
+                });
+            }
+        </script>
+     </body>
+
+</html>

@@ -1,27 +1,35 @@
 import pyaudio
 import wave
 
-def record_audio(filename="audio/response.wav", duration=5):
-    # Set up the audio stream
-    audio = pyaudio.PyAudio()
-    stream = audio.open(format=pyaudio.paInt16, channels=1,
-                        rate=44100, input=True,
-                        frames_per_buffer=1024)
-    frames = []
+def record_audio(filename="audio.wav", duration=5):
+    """Record audio and save it to the specified file."""
+    p = pyaudio.PyAudio()
+    
+    # Set parameters
+    channels = 1
+    rate = 16000
+    frames_per_buffer = 1024
+    format = pyaudio.paInt16
 
-    # Record audio for the specified duration
-    for i in range(0, int(44100 / 1024 * duration)):
-        data = stream.read(1024)
+    stream = p.open(format=format, channels=channels, rate=rate, input=True, frames_per_buffer=frames_per_buffer)
+    print("Recording...")
+
+    frames = []
+    for _ in range(0, int(rate / frames_per_buffer * duration)):
+        data = stream.read(frames_per_buffer)
         frames.append(data)
 
-    # Stop recording and save the audio file
+    print("Recording finished!")
+    
+    # Save the audio to a file
+    with wave.open(filename, 'wb') as wf:
+        wf.setnchannels(channels)
+        wf.setsampwidth(p.get_sample_size(format))
+        wf.setframerate(rate)
+        wf.writeframes(b''.join(frames))
+
     stream.stop_stream()
     stream.close()
-    audio.terminate()
-    wf = wave.open(filename, "wb")
-    wf.setnchannels(1)
-    wf.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
-    wf.setframerate(44100)
-    wf.writeframes(b"".join(frames))
-    wf.close()
+    p.terminate()
+
     return filename
