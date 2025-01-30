@@ -11,8 +11,8 @@
     <header style="text-align: center;">
       <h1>IELTS Speaking Tool</h1>
       <div class="mode-selection">
-        <button id="practiceMode">Practice Mode</button>
-        <button id="testMode">Test Mode</button>
+        <button id="practiceMode" class="mode-btn active">Practice Mode</button>
+        <button id="testMode" class="mode-btn">Test Mode</button>
       </div>
     </header>
     <main>
@@ -22,9 +22,10 @@
           <div id="question" style="font-size: 2em; margin-bottom: 20px;"></div>
         </div>
         <div class="block control-block">
-          <button id="button">I am ready to speak</button>
-          <button id="evaluate" disabled>Evaluate</button>
-          <button id="next" disabled>Next</button>
+          <button id="button">Start Listening</button>
+          <button id="evaluate" class="hidden">Evaluate</button>
+          <button id="next" class="hidden">Next</button>
+          <button id="finish" class="hidden">Finish</button>
         </div>
         <div class="block result-block">
           <h2>Your Speech:</h2>
@@ -35,25 +36,9 @@
           <div id="evaluation"></div>
         </div>
       </div>
-      <div id="part2" style="display: none;">
-        <h2>Part 2</h2>
-        <p>You have 1 minute to prepare. Then, you will have 2 minutes to speak.</p>
-        <button id="startTimer">Start Timer</button>
-        <div id="timer"></div>
-        <button id="button2" disabled>I am ready to speak</button>
-        <button id="evaluate2" disabled>Evaluate</button>
-        <button id="next2" disabled>Next</button>
-      </div>
-      <div id="part3" style="display: none;">
-        <h2>Part 3 - Conversation</h2>
-        <button id="button3">Start Conversation</button>
-        <button id="finish" disabled>Finish</button>
-      </div>
     </main>
-    <footer>
-
-    </footer>
+    <footer></footer>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>    
   </body>
 </html>

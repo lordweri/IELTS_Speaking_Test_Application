@@ -1,16 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
     let mode = "practice";
-    
+    let recording = false;
+
     const practiceModeBtn = document.getElementById("practiceMode");
     const testModeBtn = document.getElementById("testMode");
     const questionElement = document.getElementById("question");
-    const startListeningBtn = document.getElementById("startListening");
+    const startListeningBtn = document.getElementById("button");
     const evaluateBtn = document.getElementById("evaluate");
-    const nextQuestionBtn = document.getElementById("nextQuestion");
-    
-    const part1Section = document.getElementById("part1");
-    const part2Section = document.getElementById("part2");
-    const part3Section = document.getElementById("part3");
+    const nextQuestionBtn = document.getElementById("next");
+    const finishBtn = document.getElementById("finish");
+
+    const resultBlock = document.querySelector(".result-block");
+    const evaluationBlock = document.querySelector(".evaluation-block");
 
     const questions = [
         "Describe a book you recently read.",
@@ -24,119 +25,100 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setMode(selectedMode) {
         mode = selectedMode;
+
+        practiceModeBtn.classList.toggle("active", mode === "practice");
+        testModeBtn.classList.toggle("active", mode === "test");
+
         if (mode === "practice") {
             evaluateBtn.classList.remove("hidden");
             nextQuestionBtn.classList.add("hidden");
+            finishBtn.classList.add("hidden");
+            resultBlock.style.display = "block";
+            evaluationBlock.style.display = "block";
         } else {
             evaluateBtn.classList.add("hidden");
             nextQuestionBtn.classList.remove("hidden");
+            finishBtn.classList.remove("hidden");
+            resultBlock.style.display = "none";
+            evaluationBlock.style.display = "none";
         }
+
         changeQuestion();
     }
 
     practiceModeBtn.addEventListener("click", () => setMode("practice"));
     testModeBtn.addEventListener("click", () => setMode("test"));
 
-    startListeningBtn.addEventListener("click", () => {
-        startListeningBtn.textContent = "Recording...";
-        setTimeout(() => {
+    startListeningBtn.addEventListener("click", async () => {
+        if (!recording) {
+            // Start recording
+            recording = true;
+            startListeningBtn.textContent = "Stop Listening";
+
+            try {
+                await fetch('/start-recording', { method: "POST" });
+            } catch (error) {
+                console.error("Error starting recording:", error);
+                startListeningBtn.textContent = "Start Listening";
+                recording = false;
+            }
+
+        } else {
+            // Stop recording
+            recording = false;
             startListeningBtn.textContent = "Start Listening";
 
-            // Call /start-recording route to start audio recording
-            fetch('/start-recording', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data); // Handle the success response
-                    // You can also handle the audio file here
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            try {
+                let response = await fetch('/stop-recording', { method: "POST" });
+                let data = await response.json();
 
-            if (mode === "practice") {
-                evaluateBtn.classList.remove("hidden");
-            } else {
-                nextQuestionBtn.classList.remove("hidden");
+                if (data.status === "recording stopped") {
+                    let audioFile = data.audio_file;
+
+                    let processResponse = await fetch('/process-audio', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ audio_file: audioFile })
+                    });
+
+                    let processData = await processResponse.json();
+                    document.getElementById("result").textContent = processData.transcription;
+
+                    if (mode === "practice") {
+                        document.getElementById("evaluation").textContent = `Score: ${processData.score}`;
+                        evaluateBtn.classList.remove("hidden");
+                    } else {
+                        nextQuestionBtn.classList.remove("hidden");
+                    }
+                }
+            } catch (error) {
+                console.error("Error stopping recording:", error);
             }
-        }, 5000);
+        }
     });
-
 
     evaluateBtn.addEventListener("click", () => {
         evaluateBtn.textContent = "Evaluating...";
-
-        const audioFile = "audio.wav"; 
-        
-        fetch('/process-audio', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ audio_file: audioFile })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data); 
-            evaluateBtn.textContent = "Evaluate"; 
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-
         setTimeout(() => {
             evaluateBtn.textContent = "Evaluate";
         }, 3000);
     });
 
-
     nextQuestionBtn.addEventListener("click", () => {
         if (mode === "test") {
-            const audioFile = "audio.wav";  
-            fetch('/process-audio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ audio_file: audioFile })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data); 
-                changeQuestion();
-                nextQuestionBtn.classList.add("hidden"); 
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        } else {
+            resultBlock.style.display = "none";
+            evaluationBlock.style.display = "none";
             changeQuestion();
-            nextQuestionBtn.classList.add("hidden"); 
+            nextQuestionBtn.classList.add("hidden");
         }
     });
-    
-    // PART 2
-    const startTimerBtn = document.getElementById("startTimer");
-    const timerElement = document.getElementById("timer");
-    const timeLeftSpan = document.getElementById("timeLeft");
-    let timer = 60;
 
-    startTimerBtn.addEventListener("click", () => {
-        timerElement.classList.remove("hidden");
-        startTimerBtn.classList.add("hidden");
-        const interval = setInterval(() => {
-            timeLeftSpan.textContent = `${timer} seconds`;
-            timer--;
-            if (timer < 0) {
-                clearInterval(interval);
-                document.getElementById("startListeningPart2").classList.remove("hidden");
-            }
-        }, 1000);
+    finishBtn.addEventListener("click", () => {
+        if (mode === "test") {
+            resultBlock.style.display = "block";
+            evaluationBlock.style.display = "block";
+        }
     });
 
-    document.getElementById("nextPart").addEventListener("click", () => {
-        part1Section.classList.add("hidden");
-        part2Section.classList.remove("hidden");
-    });
-
-    document.getElementById("finish").addEventListener("click", () => {
-        alert("Test Completed!");
-    });
-
-    changeQuestion();
+    setMode("practice");
 });
