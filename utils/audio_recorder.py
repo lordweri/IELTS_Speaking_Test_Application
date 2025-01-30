@@ -1,7 +1,7 @@
 import pyaudio
 import wave
 
-def record_audio(filename="audio.wav", duration=5):
+def record_audio(filename="audio.wav", duration=10):
     """Record audio and save it to the specified file."""
     p = pyaudio.PyAudio()
     

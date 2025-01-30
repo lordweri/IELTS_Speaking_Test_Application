@@ -1,38 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>IELTS Speaking Simulation</title>
-    </head>
-    <body>
-        <h1>Practice Test</h1>
-        <button id="startButton">Start Recording</button>
-        <div id="feedback"></div>
-        <script>
-            document.getElementById("startButton").onclick = function(){
-                fetch('/start-recording', {method: 'POST'})
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    processAudio();
-                });
-            };
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>IELTS Speaking Tool</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header style="text-align: center;">
+      <h1>IELTS Speaking Tool</h1>
+      <div class="mode-selection">
+        <button id="practiceMode">Practice Mode</button>
+        <button id="testMode">Test Mode</button>
+      </div>
+    </header>
+    <main>
+      <div id="part1">
+        <h2>Part 1</h2>
+        <div class="block question-block">
+          <div id="question" style="font-size: 2em; margin-bottom: 20px;"></div>
+        </div>
+        <div class="block control-block">
+          <button id="button">I am ready to speak</button>
+          <button id="evaluate" disabled>Evaluate</button>
+          <button id="next" disabled>Next</button>
+        </div>
+        <div class="block result-block">
+          <h2>Your Speech:</h2>
+          <div id="result"></div>
+        </div>
+        <div class="block evaluation-block">
+          <h2>Evaluation:</h2>
+          <div id="evaluation"></div>
+        </div>
+      </div>
+      <div id="part2" style="display: none;">
+        <h2>Part 2</h2>
+        <p>You have 1 minute to prepare. Then, you will have 2 minutes to speak.</p>
+        <button id="startTimer">Start Timer</button>
+        <div id="timer"></div>
+        <button id="button2" disabled>I am ready to speak</button>
+        <button id="evaluate2" disabled>Evaluate</button>
+        <button id="next2" disabled>Next</button>
+      </div>
+      <div id="part3" style="display: none;">
+        <h2>Part 3 - Conversation</h2>
+        <button id="button3">Start Conversation</button>
+        <button id="finish" disabled>Finish</button>
+      </div>
+    </main>
+    <footer>
 
-            function processAudio(){
-                fetch('/process-audio', {method: 'POST',
-                    body: JSON.stringify({audio_file: 'audio.wav'}),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    document.getElementById("feedback").innerTEXT = JSON,stringify(data, null, 2);
-                });
-            }
-        </script>
-     </body>
-
+    </footer>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+  </body>
 </html>

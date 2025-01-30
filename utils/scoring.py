@@ -14,7 +14,7 @@ def score_response(response):
     word_count = len([token.text for token in doc if token.is_alpha])
     sentence_count = len([sent for sent in doc.sents])  
 
-    fluency_score = (word_count / sentence_count)
+    fluency_score = (word_count / sentence_count) if sentence_count > 0 else 0
 
     matches = tool.check(response)
     grammar_score = len(matches)

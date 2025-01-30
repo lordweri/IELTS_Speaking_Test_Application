@@ -12,11 +12,11 @@ whisper_model = whisper.load_model("base")
 
 def index():
     return render_template('index.html')
-
+'''
 @app.route('/start-recording', methods=['POST'])
 def start_recording():
     audio_file = record_audio()
-    return jsonify({"status": "success", "audio_file": audio_file})
+    return jsonify({"status": "success", "audio_file": "audio.wav"})
 
 @app.route('/process-audio', methods=['POST'])
 def process_audio():
@@ -24,6 +24,7 @@ def process_audio():
     transcription = speech_to_text(audio_file, whisper_model)
     score = score_response(transcription)
     return jsonify({"transcription": transcription, "score": score})
+'''
 
 if __name__ == '__main__':
     app.run(debug=True)
