@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify, render_template
 import whisper
+import urllib3
 from utils.audio_recorder import record_audio
 from utils.speech_to_text import speech_to_text
 from utils.scoring import score_response
+import warnings
+warnings.filterwarnings("ignore", category=urllib3.exceptions.NotOpenSSLWarning)
 
 app = Flask(__name__)   
 
