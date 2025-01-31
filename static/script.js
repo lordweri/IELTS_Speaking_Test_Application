@@ -1,7 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     let mode = "practice";
     let recording = false;
-    let audioFile = ""; // To store the audio file
+    let audioFile = "";
+    let questionIndex = 0;
+    let questions = [];
+    let conversations = [];
+
+
 
     const practiceModeBtn = document.getElementById("practiceMode");
     const testModeBtn = document.getElementById("testMode");
@@ -10,64 +15,118 @@ document.addEventListener("DOMContentLoaded", () => {
     const evaluateBtn = document.getElementById("evaluate");
     const nextQuestionBtn = document.getElementById("next");
     const finishBtn = document.getElementById("finish");
-
+    const newQuestionBtn = document.getElementById("newQuestion");
     const resultBlock = document.querySelector(".result-block");
     const evaluationBlock = document.querySelector(".evaluation-block");
+    const startBtn = document.getElementById("start-btn");
 
-    const questions = [
-        "Describe a book you recently read.",
-        "Talk about your favorite movie from childhood.",
-        "Describe a memorable school event."
-    ];
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     function changeQuestion() {
-        questionElement.textContent = questions[Math.floor(Math.random() * questions.length)];
+        fetch('/practice-question')
+            .then(response => response.json())
+            .then(data => {
+                questionElement.textContent = data.question;
+            })
+            .catch(error => {
+                console.error("Error fetching question:", error);
+            });
     }
+
+    function partChangeQuestion() {
+        fetch('/part-question')
+            .then(response => response.json())
+            .then(data => {
+                questions = data.questions; 
+                questionElement.textContent = questions[questionIndex];
+                conversations.push(questions[questionIndex]);
+            })
+            .catch(error => console.error('Error fetching questions:', error));
+    }
+
+    function part2ChangeQuestion() {
+        fetch('/part2-question')
+            .then(response => response.json())
+            .then(data => {
+                question2 = data.question;
+                questionElement.textContent = question2;
+                conversations.push(question2);
+            })
+            .catch(error => console.error('Error fetching questions:', error));
+    }
+
+
 
     function setMode(selectedMode) {
         mode = selectedMode;
+        testPart = 1; 
+        questionCount = 0;
 
         practiceModeBtn.classList.toggle("active", mode === "practice");
         testModeBtn.classList.toggle("active", mode === "test");
 
+        const part1Header = document.querySelector("#part1 h2");
+        part1Header.style.display = mode === "practice" ? "none" : "block"
+
         if (mode === "practice") {
+            questionElement.textContent = ""
+            changeQuestion();
             evaluateBtn.classList.remove("hidden");
             nextQuestionBtn.classList.add("hidden");
+            newQuestionBtn.classList.remove("hidden");
             finishBtn.classList.add("hidden");
             resultBlock.style.display = "block";
             evaluationBlock.style.display = "block";
+            startBtn.classList.add("hidden");
         } else {
             evaluateBtn.classList.add("hidden");
-            nextQuestionBtn.classList.remove("hidden");
-            finishBtn.classList.remove("hidden");
+            nextQuestionBtn.classList.add("hidden");
+            newQuestionBtn.classList.add("hidden");
             resultBlock.style.display = "none";
             evaluationBlock.style.display = "none";
+            questionElement.textContent = "Press Start To Begin";
+            startBtn.classList.remove("hidden");
         }
 
-        changeQuestion();
     }
 
     practiceModeBtn.addEventListener("click", () => setMode("practice"));
     testModeBtn.addEventListener("click", () => setMode("test"));
 
+    newQuestionBtn.addEventListener("click", () => {
+        questionElement.textContent = "";
+        changeQuestion();
+    });
+    
     startListeningBtn.addEventListener("click", async () => {
         if (!recording) {
+            // Clear previous speech & evaluation only when starting a new recording
+            document.getElementById("transcription").textContent = "";
+            document.getElementById("evaluation").textContent = "";
+    
             // Start recording
             recording = true;
             startListeningBtn.textContent = "Stop Listening";
+            startListeningBtn.classList.remove("start-listening");
+            startListeningBtn.classList.add("recording");
     
             try {
                 await fetch('/start-recording', { method: "POST" });
             } catch (error) {
                 console.error("Error starting recording:", error);
                 startListeningBtn.textContent = "Start Listening";
+                startListeningBtn.classList.remove("recording");
+                startListeningBtn.classList.add("start-listening");
                 recording = false;
             }
-    
         } else {
             // Stop recording
             recording = false;
             startListeningBtn.textContent = "Start Listening";
+            startListeningBtn.classList.remove("recording");
+            startListeningBtn.classList.add("start-listening");
     
             try {
                 let response = await fetch('/stop-recording', { method: "POST" });
@@ -84,8 +143,11 @@ document.addEventListener("DOMContentLoaded", () => {
     
                     let processData = await processResponse.json();
                     document.getElementById("transcription").textContent = processData.transcription;
-    
-                    // Displaying evaluation score in practice mode
+
+                    if (mode === "test") {
+                        conversations.push(processData.transcription);
+                    }
+
                     if (mode === "practice") {
                         finishBtn.classList.add("hidden");
                     } else {
@@ -100,46 +162,98 @@ document.addEventListener("DOMContentLoaded", () => {
     
     evaluateBtn.addEventListener("click", async () => {
         evaluateBtn.textContent = "Evaluating..."; // Show evaluating text
-
+    
         try {
-            let processResponse = await fetch('/process-audio', {
+            // Get the question and transcription from the UI
+            let question = document.getElementById("question").textContent;
+            let transcription = document.getElementById("transcription").textContent;
+    
+            let processResponse = await fetch('/evaluate-response', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ audio_file: audioFile }) // Send audio file for evaluation
+                body: JSON.stringify({ question: question, transcription: transcription }) // Send correct data
             });
-
+    
             let processData = await processResponse.json();
-
-            // Update UI with evaluation results
-            document.getElementById("evaluation").textContent = processData.evaluation;
-
-            // Optionally, hide the button after evaluation
-            evaluateBtn.classList.add("hidden");
-
+    
+            // Check if evaluation exists in response
+            if (processData.evaluation) {
+                document.getElementById("evaluation").innerHTML = processData.evaluation;
+            } else {
+                document.getElementById("evaluation").textContent = "Error: No evaluation received.";
+            }
+    
         } catch (error) {
             console.error("Error during evaluation:", error);
-            evaluateBtn.textContent = "Error. Try again!";
+            document.getElementById("evaluation").textContent = "Error. Try again!";
         }
-
+    
         // Revert button text after the process is complete
         setTimeout(() => {
             evaluateBtn.textContent = "Evaluate";
         }, 3000);
     });
-
+    
     nextQuestionBtn.addEventListener("click", () => {
+        if (mode === "test") { 
+            if (questionIndex < 6) { 
+                questionIndex++; // Go to next question
+                questionElement.textContent = questions[questionIndex];
+                conversations.push(questions[questionIndex]);
+                console.log("Response:", conversations);
+            } else { 
+                questionElement.textContent = "Click Finish to see your results!";
+                finishBtn.classList.remove("hidden");
+                startListeningBtn.classList.add("hidden");
+
+ 
+            }
+        }
+    });
+    
+    finishBtn.addEventListener("click", async () => {
         if (mode === "test") {
-            resultBlock.style.display = "none";
-            evaluationBlock.style.display = "none";
-            changeQuestion();
-            nextQuestionBtn.classList.add("hidden");
+            try {
+                // Show loading state
+                finishBtn.disabled = true;
+                finishBtn.textContent = "Analyzing...";
+    
+                // Send the conversations list to the backend
+                const response = await fetch('/analyze-response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ conversations: conversations })
+                });
+    
+                const data = await response.json();
+    
+                if (data.feedback) {
+                    // Display the feedback
+                    document.getElementById("evaluation").innerHTML = data.feedback;
+                    resultBlock.style.display = "block";
+                    evaluationBlock.style.display = "block";
+                } else if (data.error) {
+                    // Display the error message
+                    document.getElementById("evaluation").textContent = data.error;
+                }
+            } catch (error) {
+                console.error("Error analyzing response:", error);
+                document.getElementById("evaluation").textContent = "Error analyzing response. Please try again.";
+            } finally {
+                // Reset the button
+                finishBtn.disabled = false;
+                finishBtn.textContent = "Finish";
+            }
         }
     });
 
-    finishBtn.addEventListener("click", () => {
+    startBtn.addEventListener("click", () => {
         if (mode === "test") {
-            resultBlock.style.display = "block";
-            evaluationBlock.style.display = "block";
+            startBtn.classList.add("hidden");
+            nextQuestionBtn.classList.remove("hidden"); 
+            partChangeQuestion();
         }
     });
 

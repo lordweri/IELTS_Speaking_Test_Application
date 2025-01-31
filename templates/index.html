@@ -17,15 +17,18 @@
     </header>
     <main>
       <div id="part1">
-        <h2>Part 1</h2>
+        <h2>Test 1</h2>
         <div class="block question-block">
           <div id="question" style="font-size: 2em; margin-bottom: 20px;"></div>
+          <button id="newQuestion" class="new-question-btn">New Question</button>
         </div>
         <div class="block control-block">
-          <button id="button">Start Listening</button>
+          <button id="button" class="start-listening">Start Listening</button>
           <button id="evaluate" class="hidden">Evaluate</button>
           <button id="next" class="hidden">Next</button>
           <button id="finish" class="hidden">Finish</button>
+          <button id="start-btn" class="start-btn">Start</button>
+          <button id="download-btn" class="hidden">Download</button>
         </div>
         <div class="block result-block">
           <h2>Your Speech:</h2>
@@ -42,4 +45,3 @@
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>    
   </body>
 </html>
-

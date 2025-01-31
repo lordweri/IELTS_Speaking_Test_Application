@@ -63,3 +63,50 @@ button {
 .hidden {
   display: none;
 }
+
+.start-listening {
+  background-color: #81c784; 
+  color: white;
+}
+
+.recording {
+  background-color: #e53935; 
+  color: white;
+}
+
+#evaluate {
+  background: #ffe0b2; 
+  color: black;
+}
+
+#evaluate:hover {
+  background: #ffcc80;
+}
+
+.new-question-btn {
+  background-color: #b0bec5; /* Grey color */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.new-question-btn:hover {
+  background-color: #78909c; /* Darker grey on hover */
+}
+
+.start-btn {
+  background-color: #819cc7; /* Green color */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.start-btn:hover {
+  background-color: #4caf50; /* Darker green on hover */
+}
