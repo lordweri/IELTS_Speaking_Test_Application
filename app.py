@@ -3,7 +3,7 @@ import whisper
 import urllib3
 from utils.audio_recorder import AudioRecorder
 from utils.speech_to_text import speech_to_text
-from utils.scoring import score_response
+from utils.scoring import analyze_response
 import warnings
 warnings.filterwarnings("ignore", category=urllib3.exceptions.NotOpenSSLWarning)
 
@@ -36,9 +36,9 @@ def time_recording():
 def process_audio():
     audio_file = request.json['audio_file']
     transcription = speech_to_text(audio_file, whisper_model)
-    score = score_response(transcription)
-    return jsonify({"transcription": transcription, "score": score})
+    evaluation = analyze_response(transcription)
 
+    return jsonify({"evaluation": evaluation, "transcription": transcription})
 
 if __name__ == '__main__':
     app.run(debug=True)

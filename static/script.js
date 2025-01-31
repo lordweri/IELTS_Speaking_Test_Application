@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     let mode = "practice";
     let recording = false;
+    let audioFile = ""; // To store the audio file
 
     const practiceModeBtn = document.getElementById("practiceMode");
     const testModeBtn = document.getElementById("testMode");
@@ -54,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Start recording
             recording = true;
             startListeningBtn.textContent = "Stop Listening";
-
+    
             try {
                 await fetch('/start-recording', { method: "POST" });
             } catch (error) {
@@ -62,31 +63,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 startListeningBtn.textContent = "Start Listening";
                 recording = false;
             }
-
+    
         } else {
             // Stop recording
             recording = false;
             startListeningBtn.textContent = "Start Listening";
-
+    
             try {
                 let response = await fetch('/stop-recording', { method: "POST" });
                 let data = await response.json();
-
+    
                 if (data.status === "recording stopped") {
-                    let audioFile = data.audio_file;
-
+                    audioFile = data.audio_file;
+    
                     let processResponse = await fetch('/process-audio', {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ audio_file: audioFile })
                     });
-
+    
                     let processData = await processResponse.json();
-                    document.getElementById("result").textContent = processData.transcription;
-
+                    document.getElementById("transcription").textContent = processData.transcription;
+    
+                    // Displaying evaluation score in practice mode
                     if (mode === "practice") {
-                        document.getElementById("evaluation").textContent = `Score: ${processData.score}`;
-                        evaluateBtn.classList.remove("hidden");
+                        finishBtn.classList.add("hidden");
                     } else {
                         nextQuestionBtn.classList.remove("hidden");
                     }
@@ -96,9 +97,31 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
+    
+    evaluateBtn.addEventListener("click", async () => {
+        evaluateBtn.textContent = "Evaluating..."; // Show evaluating text
 
-    evaluateBtn.addEventListener("click", () => {
-        evaluateBtn.textContent = "Evaluating...";
+        try {
+            let processResponse = await fetch('/process-audio', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ audio_file: audioFile }) // Send audio file for evaluation
+            });
+
+            let processData = await processResponse.json();
+
+            // Update UI with evaluation results
+            document.getElementById("evaluation").textContent = processData.evaluation;
+
+            // Optionally, hide the button after evaluation
+            evaluateBtn.classList.add("hidden");
+
+        } catch (error) {
+            console.error("Error during evaluation:", error);
+            evaluateBtn.textContent = "Error. Try again!";
+        }
+
+        // Revert button text after the process is complete
         setTimeout(() => {
             evaluateBtn.textContent = "Evaluate";
         }, 3000);

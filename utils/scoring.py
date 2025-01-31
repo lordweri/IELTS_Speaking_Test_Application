@@ -1,24 +1,42 @@
-import spacy
 from language_tool_python import LanguageTool
+import google.generativeai as gai
 
-# Load the language model
-nlp = spacy.load("en_core_web_sm")
 
-# Initialize the language tool for grammar checks
-tool = LanguageTool('en-US')
+gai.configure(api_key="AIzaSyA8kpqELwgcmJY4530KtfYzeAWXf5dDIMk")
+gemini_llm = gai.GenerativeModel("gemini-1.5-flash")
 
-def score_response(response):
-    """Score the response based on grammar and spelling."""
-    # Tokenize the response
-    doc = nlp(response)
-    word_count = len([token.text for token in doc if token.is_alpha])
-    sentence_count = len([sent for sent in doc.sents])  
+def analyze_response(transcription):  # Changed function name
+    """Use Gemini to analyze the response as an IELTS examiner."""
 
-    fluency_score = (word_count / sentence_count) if sentence_count > 0 else 0
+    prompt = f"""
+    You are an IELTS Speaking examiner. Evaluate the candidate's response:
 
-    matches = tool.check(response)
-    grammar_score = len(matches)
+    Candidate Response: {transcription}
 
-    lexical_score = len(set([token.text.lower() for token in doc if token.is_alpha])) / word_count
-    overall_score = fluency_score - grammar_score + lexical_score
-    return {"fluency_score": fluency_score, "grammar_score": grammar_score, "lexical_score": lexical_score, "overall_score": overall_score}
+    Provide concise feedback in this format:
+
+    Examiner Feedback:
+    Band Score: (Provide a likely band score, e.g., Band 7-8).
+    Strengths: (Mention fluency, vocabulary, and grammatical strengths).
+    Areas for Improvement: (Point out areas that could be improved).
+
+    Pronunciation Tips:
+    Stress: (Highlight key words with correct stress).
+    Sounds: (Identify difficult sounds to improve).
+    Intonation: (Suggest improvements).
+
+    Vocabulary Tips:
+    Synonyms: (Suggest alternatives for commonly used words).
+    Collocations: (Recommend natural word pairings).
+    """
+
+    try:
+        response = gemini_llm.generate_content(prompt) # Call Gemini API
+        return response.text.strip() # Access the text content
+    except Exception as e:
+        print(f"Error calling Gemini API: {e}")
+        return "Error analyzing response."  # Handle errors gracefully
+
+
+
+
