@@ -1,3 +1,7 @@
+#Weriya Masao
+#2025/02/01
+#This script contains functions to score IELTS Speaking test responses using the Generative AI API.
+
 from language_tool_python import LanguageTool
 import google.generativeai as gai
 import regex as re

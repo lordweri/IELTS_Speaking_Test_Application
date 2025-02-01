@@ -1,3 +1,7 @@
+//Weri Masao
+// 2025-02-01
+// IELTS Speaking Test Feedback System
+
 document.addEventListener("DOMContentLoaded", () => {
     let mode = "practice";
     let recording = false;
@@ -6,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let questions = [];
     let conversations = [];
 
-
+// Get the elements from the DOM
 
     const practiceModeBtn = document.getElementById("practiceMode");
     const testModeBtn = document.getElementById("testMode");
@@ -21,9 +25,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const startBtn = document.getElementById("start-btn");
     const downloadBtn = document.getElementById("download-btn");
 
+// Function to sleep for a given number of milliseconds
+
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+// Function to change the question
 
     function changeQuestion() {
         fetch('/practice-question')
@@ -36,6 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
+// Function to change the part question
+
     function partChangeQuestion() {
         fetch('/part-question')
             .then(response => response.json())
@@ -47,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => console.error('Error fetching questions:', error));
     }
 
+// Function to set the mode
 
     function setMode(selectedMode) {
         mode = selectedMode;
@@ -91,7 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
         questionElement.textContent = "";
         changeQuestion();
     });
-    
+
+// Event listeners for the buttons
+
     startListeningBtn.addEventListener("click", async () => {
         if (!recording) {
             // Clear previous speech & evaluation only when starting a new recording

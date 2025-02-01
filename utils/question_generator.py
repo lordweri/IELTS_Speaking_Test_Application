@@ -1,7 +1,14 @@
+# Weriya Masao
+# 2025/02/01
+# This script contains functions to generate IELTS Speaking test questions using the Generative AI API.
+
 import google.generativeai as genai
 import random
+
+# Set up the Generative AI API and load the Gemini model
 genai.configure(api_key="AIzaSyA8kpqELwgcmJY4530KtfYzeAWXf5dDIMk")  
 model = genai.GenerativeModel("gemini-1.5-flash")
+
 def generate_part1_question():
     """Generates a list of three Part 1 questions for the IELTS Speaking test."""
     

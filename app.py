@@ -1,3 +1,7 @@
+# Weriya Masao
+# 2025/02/01
+# This is the main script that runs the Flask web application for the IELTS Speaking Test Evaluation System.
+
 from flask import Flask, request, jsonify, render_template
 import whisper
 import urllib3
@@ -10,12 +14,15 @@ import traceback
 
 warnings.filterwarnings("ignore", category=urllib3.exceptions.NotOpenSSLWarning)
 
-
+# Initialize the Flask application
 app = Flask(__name__)   
 recorder = AudioRecorder()
+
 #Load Whisper Model
 whisper_model = whisper.load_model("base")
 @app.route('/')
+
+# Definition of all the routes
 
 def index():
     return render_template('index.html')

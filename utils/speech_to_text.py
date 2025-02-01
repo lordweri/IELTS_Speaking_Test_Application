@@ -1,3 +1,7 @@
+#weriya Masao
+#2025/02/01
+#This script contains functions to convert speech to text using the Whisper model.
+
 import whisper
 
 def speech_to_text(audio_file, model):
