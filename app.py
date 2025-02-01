@@ -3,9 +3,11 @@ import whisper
 import urllib3
 from utils.audio_recorder import AudioRecorder
 from utils.speech_to_text import speech_to_text
-from utils.scoring import analyze_response, analyze_response_function
+from utils.scoring import analyse_response, analyze_response_function
 from utils.question_generator import generate_part1_question, practice_questions
 import warnings
+import traceback
+
 warnings.filterwarnings("ignore", category=urllib3.exceptions.NotOpenSSLWarning)
 
 
@@ -55,7 +57,7 @@ def evaluate_response():
     if not question or not transcription:
         return jsonify({"error": "Both question and transcription are required"}), 400
 
-    evaluation = analyze_response(transcription, question)
+    evaluation = analyse_response(transcription, question)
     evaluation = evaluation.replace("\n", "<br>")
 
     return jsonify({"evaluation": evaluation})
@@ -68,11 +70,14 @@ def analyze_response():
         if not conversations or len(conversations) % 2 != 0:
             return jsonify({"error": "Invalid conversations format. Expected a list of Q&A pairs."}), 400
 
-        # Call the analyze_response function (assuming it's defined elsewhere)
-        feedback = analyze_response_function(conversations)  # Replace with your actual function
+        # Call the function to analyze responses
+        feedback = analyze_response_function(conversations)
+        
         return jsonify({"feedback": feedback})
+
     except Exception as e:
-        print(f"Error analyzing response: {e}")
+        print("Full Error Traceback:")
+        traceback.print_exc()  # Print full error details
         return jsonify({"error": "An error occurred while analyzing the response."}), 500
     
 

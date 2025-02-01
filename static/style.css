@@ -108,5 +108,19 @@ button {
 }
 
 .start-btn:hover {
-  background-color: #4caf50; /* Darker green on hover */
+  background-color: #4caf50; 
+}
+
+.download-btn {
+  background-color: #1a5f5b; 
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.download-btn:hover {
+  background-color: #1a5f5b; 
 }

@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const resultBlock = document.querySelector(".result-block");
     const evaluationBlock = document.querySelector(".evaluation-block");
     const startBtn = document.getElementById("start-btn");
+    const downloadBtn = document.getElementById("download-btn");
 
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -46,18 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => console.error('Error fetching questions:', error));
     }
 
-    function part2ChangeQuestion() {
-        fetch('/part2-question')
-            .then(response => response.json())
-            .then(data => {
-                question2 = data.question;
-                questionElement.textContent = question2;
-                conversations.push(question2);
-            })
-            .catch(error => console.error('Error fetching questions:', error));
-    }
-
-
 
     function setMode(selectedMode) {
         mode = selectedMode;
@@ -80,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resultBlock.style.display = "block";
             evaluationBlock.style.display = "block";
             startBtn.classList.add("hidden");
+            downloadBtn.classList.remove("hidden");
         } else {
             evaluateBtn.classList.add("hidden");
             nextQuestionBtn.classList.add("hidden");
@@ -88,6 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
             evaluationBlock.style.display = "none";
             questionElement.textContent = "Press Start To Begin";
             startBtn.classList.remove("hidden");
+            startListeningBtn.classList.add("hidden");
+            downloadBtn.classList.add("hidden");
         }
 
     }
@@ -183,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("evaluation").textContent = "Error: No evaluation received.";
             }
     
-        } catch (error) {
+        } catch (error){
             console.error("Error during evaluation:", error);
             document.getElementById("evaluation").textContent = "Error. Try again!";
         }
@@ -205,6 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 questionElement.textContent = "Click Finish to see your results!";
                 finishBtn.classList.remove("hidden");
                 startListeningBtn.classList.add("hidden");
+                nextQuestionBtn.classList.add("hidden");
+                downloadBtn.classList.remove("hidden");
 
  
             }
@@ -217,6 +211,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Show loading state
                 finishBtn.disabled = true;
                 finishBtn.textContent = "Analyzing...";
+
+                console.log("Sending conversations:", conversations);  
     
                 // Send the conversations list to the backend
                 const response = await fetch('/analyze-response', {
@@ -232,7 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.feedback) {
                     // Display the feedback
                     document.getElementById("evaluation").innerHTML = data.feedback;
-                    resultBlock.style.display = "block";
                     evaluationBlock.style.display = "block";
                 } else if (data.error) {
                     // Display the error message
@@ -243,8 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("evaluation").textContent = "Error analyzing response. Please try again.";
             } finally {
                 // Reset the button
-                finishBtn.disabled = false;
-                finishBtn.textContent = "Finish";
+                finishBtn.classList.add("hidden");
             }
         }
     });
@@ -252,10 +246,35 @@ document.addEventListener("DOMContentLoaded", () => {
     startBtn.addEventListener("click", () => {
         if (mode === "test") {
             startBtn.classList.add("hidden");
-            nextQuestionBtn.classList.remove("hidden"); 
+            nextQuestionBtn.classList.remove("hidden");
+            startListeningBtn.classList.remove("hidden"); 
             partChangeQuestion();
         }
     });
+    downloadBtn.addEventListener("click", function () {
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF();
+
+        const feedback = document.getElementById("evaluation").innerText;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.text("IELTS Speaking Test Feedback", 10, 10);
+    
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        let y = 20;
+
+
+        const lines = doc.splitTextToSize(feedback, 180);
+        lines.forEach(line => {
+            doc.text(line, 10, y);
+            y += 7;
+        });
+        doc.save("IELTS_Feedback.pdf");
+    });
+    
 
     setMode("practice");
 });
