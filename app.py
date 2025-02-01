@@ -10,6 +10,7 @@ from utils.speech_to_text import speech_to_text
 from utils.scoring import analyse_response, analyze_response_function
 from utils.question_generator import generate_part1_question, practice_questions
 import warnings
+import webbrowser
 import traceback
 
 warnings.filterwarnings("ignore", category=urllib3.exceptions.NotOpenSSLWarning)
@@ -89,4 +90,11 @@ def analyze_response():
     
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    import threading
+    def run_server():
+        app.run(debug=True)
+    
+    server_thread = threading.Thread(target=run_server)
+    server_thread.start()
+
+    webbrowser.open("http://127.0.0.1:5000")
