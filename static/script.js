@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resultBlock.style.display = "block";
             evaluationBlock.style.display = "block";
             startBtn.classList.add("hidden");
+            startListeningBtn.classList.remove("hidden");
         } else {
             evaluateBtn.classList.add("hidden");
             nextQuestionBtn.classList.add("hidden");
