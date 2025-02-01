@@ -90,11 +90,5 @@ def analyze_response():
     
 
 if __name__ == '__main__':
-    import threading
-    def run_server():
-        app.run(debug=True)
-    
-    server_thread = threading.Thread(target=run_server)
-    server_thread.start()
-
     webbrowser.open("http://127.0.0.1:5000")
+    app.run(debug=True)
