@@ -4,9 +4,11 @@ Markdown
 
 #RUN THIS COMMAND BEFORE RUNNING THE APPLICATION PLEASE
 
-pip uninstall torch torchvision torchaudio
-pip cache purge
-pip install torch torchvision torchaudio
+**pip uninstall torch torchvision torchaudio**
+
+**pip cache purge**
+
+**pip install torch torchvision torchaudio**
 
 
 This project is a web application designed to simulate the IELTS Speaking test, providing users with practice questions, recording functionality, automated speech-to-text conversion, and AI-powered evaluation and feedback.
